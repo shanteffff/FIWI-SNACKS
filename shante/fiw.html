@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fiwi Snacks</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffaf3;
+      margin: 0; padding: 0;
+    }
+    header {
+      background-color: #ffb300;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      padding: 2rem;
+    }
+    .product {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .product img {
+      max-height: 150px;
+      width: 100%;
+      object-fit: contain;
+    }
+    .btn {
+      background: #ff6600;
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+    .cart, form {
+      padding: 2rem;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Fiwi Snacks</div>
+  <p>Bringing the authentic taste of Jamaica, locally & internationally 🌍</p>
+  <p>@fiwisnacks</p>
+</header>
+
+<section class="products" id="product-list">
+  <!-- Products load here -->
+</section>
+
+<section class="cart">
+  <h2>Your Cart</h2>
+  <ul id="cart-items"></ul>
+  <p><strong>Total:</strong> $<span id="total">0.00</span></p>
+</section>
+
+<section class="form">
+  <h2>Submit Your Order</h2>
+  <form action="https://formspree.io/f/mnnvpjwg" method="POST" onsubmit="return prepareOrder();">
+    <label>Name:</label><br>
+    <input type="text" name="name" required><br><br>
+    <label>Email:</label><br>
+    <input type="email" name="_replyto" required><br><br>
+    <label>Phone:</label><br>
+    <input type="text" name="phone" required><br><br>
+    <label>Your Order:</label><br>
+    <textarea name="order" id="orderDetails" readonly></textarea><br><br>
+    <button class="btn" type="submit">Send Order</button>
+  </form>
+</section>
+
+<script>
+  const products = [
+    { name: "Big Foot", price: 3.50, img: "https://i.imgur.com/j7WTgf3.png" },
+    { name: "Cheese Trix", price: 3.50, img: "https://i.imgur.com/FVRVVfG.png" },
+    { name: "Banana Chips", price: 4.00, img: "https://i.imgur.com/jTSW45p.png" },
+    { name: "Shirley Biscuits", price: 3.75, img: "https://i.imgur.com/KpxYPAF.png" },
+    { name: "Ginger Bulla", price: 2.50, img: "https://i.imgur.com/0w3nBTz.png" },
+    { name: "Tamarind Balls", price: 2.75, img: "https://i.imgur.com/HTD6CGK.png" },
+    { name: "Coconut Drops", price: 3.00, img: "https://i.imgur.com/GcSOW5u.png" },
+    { name: "Peanut Brittle", price: 3.50, img: "https://i.imgur.com/3EuMxWz.png" },
+    { name: "St. Mary’s Banana Chips", price: 4.50, img: "https://i.imgur.com/IZmZCOw.png" },
+    { name: "Excelsior Water Crackers", price: 3.75, img: "https://i.imgur.com/oTk57Ax.png" },
+    { name: "Busta Candy (Bag)", price: 2.50, img: "https://i.imgur.com/EzUNvdi.png" },
+    { name: "Gizzada (Pack of 2)", price: 4.00, img: "https://i.imgur.com/9B8V8OD.png" },
+    { name: "Grater Cake", price: 3.50, img: "https://i.imgur.com/MYv7P1n.png" },
+    { name: "Cassava Chips", price: 4.25, img: "https://i.imgur.com/N04cQ5a.png" },
+    { name: "Jerk Seasoning Bottle", price: 5.50, img: "https://i.imgur.com/hEVkgTy.png" },
+    { name: "Curry Powder", price: 3.25, img: "https://i.imgur.com/1n2He82.png" },
+    { name: "Chocolate Digestives", price: 4.25, img: "https://i.imgur.com/bp9sSDh.png" },
+    { name: "Ping Pong Candy", price: 2.75, img: "https://i.imgur.com/yvYdX9H.png" },
+    { name: "Ginger Biscuit", price: 3.00, img: "https://i.imgur.com/2b1u7Dj.png" },
+    { name: "Coconut Powder", price: 5.00, img: "https://i.imgur.com/MVG9Rlm.png" },
+    { name: "All Purpose Seasoning", price: 4.50, img: "https://i.imgur.com/xqDbyzY.png" },
+    { name: "Chicken Seasoning", price: 4.50, img: "https://i.imgur.com/2Mwjyrd.png" },
+    { name: "Cock Soup Mix", price: 3.75, img: "https://i.imgur.com/WxFVYsu.png" }
+  ];
+
+  const cart = [];
+
+  function loadProducts() {
+    const productList = document.getElementById('product-list');
+    products.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = 'product';
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.name}" />
+        <h3>${p.name}</h3>
+        <p>$${p.price.toFixed(2)}</p>
+        <button class="btn" onclick="addToCart(${i})">Add to Cart</button>
+      `;
+      productList.appendChild(div);
+    });
+  }
+
+  function addToCart(index) {
+    cart.push(products[index]);
+    updateCart();
+  }
+
+  function updateCart() {
+    const cartList = document.getElementById('cart-items');
+    cartList.innerHTML = '';
+    let total = 0;
+    cart.forEach((item) => {
+      total += item.price;
+      const li = document.createElement('li');
+      li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
+      cartList.appendChild(li);
+    });
+    document.getElementById('total').textContent = total.toFixed(2);
+  }
+
+  function prepareOrder() {
+    const details = cart.length > 0 ? cart.map(i => `${i.name} - $${i.price.toFixed(2)}`).join('\n') : 'Cart was empty.';
+    document.getElementById('orderDetails').value = details;
+    return cart.length > 0; // prevent submitting empty cart
+  }
+
+  loadProducts();
+</script>
+
+</body>
+</html>
